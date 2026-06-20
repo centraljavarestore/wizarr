@@ -1,0 +1,54 @@
+<div class="container-fluid px-3">
+  <h4>{{ _("Edit Plan") if edit else _("New Plan") }}</h4>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          {{ form.name.label(class="form-label") }}
+          {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+          {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors[0] }}</div>{% endif %}
+          {% if form.name.description %}<div class="form-text">{{ form.name.description }}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.description.label(class="form-label") }}
+          {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else "")) }}
+          {% if form.description.description %}<div class="form-text">{{ form.description.description }}</div>{% endif %}
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            {{ form.duration_days.label(class="form-label") }}
+            {{ form.duration_days(class="form-control" + (" is-invalid" if form.duration_days.errors else "")) }}
+            {% if form.duration_days.errors %}<div class="invalid-feedback">{{ form.duration_days.errors[0] }}</div>{% endif %}
+            {% if form.duration_days.description %}<div class="form-text">{{ form.duration_days.description }}</div>{% endif %}
+          </div>
+          <div class="col-md-4 mb-3">
+            {{ form.price.label(class="form-label") }}
+            {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else "")) }}
+            {% if form.price.errors %}<div class="invalid-feedback">{{ form.price.errors[0] }}</div>{% endif %}
+            {% if form.price.description %}<div class="form-text">{{ form.price.description }}</div>{% endif %}
+          </div>
+          <div class="col-md-4 mb-3">
+            {{ form.sort_order.label(class="form-label") }}
+            {{ form.sort_order(class="form-control" + (" is-invalid" if form.sort_order.errors else "")) }}
+            {% if form.sort_order.description %}<div class="form-text">{{ form.sort_order.description }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="y" {{ 'checked' if edit and plan.is_active else 'checked' }}>
+          <label class="form-check-label" for="is_active">{{ _("Active") }}</label>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">{{ _("Save") }}</button>
+          <a href="{{ url_for('admin.subscription_plans') }}" class="btn btn-secondary">{{ _("Cancel") }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -83,6 +83,32 @@ class InvitationFlowManager:
                     },
                 )
 
+            # ── NEW: Check subscription plans — redirect to /subscribe/<code> if plans exist ──
+            from app.models import SubscriptionPlan
+
+            has_subscription_plans = SubscriptionPlan.query.filter_by(is_active=True).count() > 0
+            if has_subscription_plans:
+                # Check if payment already completed for this invite code
+                from app.models import PaymentTransaction
+
+                completed_tx = (
+                    PaymentTransaction.query
+                    .filter_by(invitation_id=invitation.id, status="completed")
+                    .first()
+                )
+                if not completed_tx:
+                    # Redirect to subscription plan selection
+                    return InvitationResult(
+                        status=ProcessingStatus.REDIRECT_REQUIRED,
+                        message="Subscription required",
+                        successful_servers=[],
+                        failed_servers=[],
+                        redirect_url=url_for("subscription.plans", invite_code=code),
+                        session_data={
+                            "invitation_in_progress": True,
+                        },
+                    )
+
             # Track bundle selection in session for downstream routes
             bundle_id = getattr(invitation, "wizard_bundle_id", None)
             if bundle_id:

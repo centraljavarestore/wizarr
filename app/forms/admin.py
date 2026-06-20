@@ -79,3 +79,55 @@ class AdminUpdateForm(FlaskForm):
             self.confirm.errors = [str(_l("Please confirm the new password."))]
             return False
         return True
+
+
+class SubscriptionPlanForm(FlaskForm):
+    name = StringField(
+        str(_l("Plan Name")),
+        validators=[DataRequired()],
+        description=str(_l("e.g. 1 Month, 3 Months, 1 Year")),
+    )
+    description = StringField(
+        str(_l("Description")),
+        validators=[Optional()],
+        description=str(_l("Short description shown to users")),
+    )
+    duration_days = StringField(
+        str(_l("Duration (days)")),
+        validators=[DataRequired()],
+        description=str(_l("e.g. 30, 90, 180, 365")),
+    )
+    price = StringField(
+        str(_l("Price (IDR)")),
+        validators=[DataRequired()],
+        description=str(_l("Price in Indonesian Rupiah. e.g. 25000")),
+    )
+    sort_order = StringField(
+        str(_l("Sort Order")),
+        default="0",
+        description=str(_l("Lower numbers appear first")),
+    )
+    is_active = StringField(default="y")  # Simple checkbox value
+
+    def validate_duration_days(self, field):
+        try:
+            val = int(field.data)
+            if val < 1:
+                raise ValueError()
+        except (ValueError, TypeError):
+            raise ValueError(str(_l("Duration must be a positive whole number (days).")))
+
+    def validate_price(self, field):
+        try:
+            val = int(field.data)
+            if val < 1:
+                raise ValueError()
+        except (ValueError, TypeError):
+            raise ValueError(str(_l("Price must be a positive whole number (IDR).")))
+
+    def validate_sort_order(self, field):
+        if field.data:
+            try:
+                int(field.data)
+            except (ValueError, TypeError):
+                raise ValueError(str(_l("Sort order must be a whole number.")))

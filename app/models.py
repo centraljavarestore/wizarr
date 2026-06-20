@@ -409,15 +409,122 @@ class Connection(db.Model):
         nullable=False,
     )
 
-    # Relationships
-    media_server = db.relationship(
-        "MediaServer",
-        backref=db.backref("connections", lazy=True, passive_deletes=True),
-        passive_deletes=True,
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Subscription & Payment models (2026-06)
+# ─────────────────────────────────────────────────────────────────────────────
+class SubscriptionPlan(db.Model):
+    """Subscription plan options shown during pre-invite wizard.
+
+    Each plan has a name, description, price in IDR, and duration in days.
+    Plans are shown to users when an invitation has subscription enabled.
+    """
+
+    __tablename__ = "subscription_plan"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)  # e.g. "1 Month", "3 Months"
+    description = db.Column(db.String, nullable=True)
+    duration_days = db.Column(db.Integer, nullable=False)  # e.g. 30, 90, 180, 365
+    price = db.Column(db.Integer, nullable=False)  # Price in IDR (Rupiah)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    sort_order = db.Column(db.Integer, default=0, nullable=False)
+    created_at = db.Column(
+        db.DateTime, default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
     )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "duration_days": self.duration_days,
+            "price": self.price,
+            "is_active": self.is_active,
+            "sort_order": self.sort_order,
+        }
+
+
+class PaymentTransaction(db.Model):
+    """Track payment transactions via Pakasir payment gateway.
+
+    Records the entire lifecycle of a payment from creation through
+    webhook completion. Also links to the subscription plan and invitation
+    so we know what access to grant upon successful payment.
+    """
+
+    __tablename__ = "payment_transaction"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.String, nullable=False, unique=True, index=True)
+    amount = db.Column(db.Integer, nullable=False)  # Amount sent to Pakasir
+    fee = db.Column(db.Integer, nullable=True)  # Pakasir fee
+    total_payment = db.Column(db.Integer, nullable=True)  # Total charged to user
+    payment_method = db.Column(db.String, nullable=True)  # 'qris', 'va', etc.
+    qr_string = db.Column(db.Text, nullable=True)  # Raw QR string from Pakasir
+    status = db.Column(
+        db.String, nullable=False, default="pending", index=True
+    )  # pending, completed, failed, expired
+    expired_at = db.Column(db.DateTime, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
+
+    # Foreign keys
+    subscription_plan_id = db.Column(
+        db.Integer, db.ForeignKey("subscription_plan.id"), nullable=True
+    )
+    invitation_id = db.Column(
+        db.Integer, db.ForeignKey("invitation.id", ondelete="SET NULL"), nullable=True
+    )
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # Relationships
+    subscription_plan = db.relationship(
+        "SubscriptionPlan", backref=db.backref("transactions", lazy=True)
+    )
+    invitation = db.relationship(
+        "Invitation", backref=db.backref("payment_transactions", lazy=True)
+    )
+    user = db.relationship(
+        "User", backref=db.backref("payment_transactions", lazy=True)
+    )
+
+    created_at = db.Column(
+        db.DateTime, default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "amount": self.amount,
+            "fee": self.fee,
+            "total_payment": self.total_payment,
+            "payment_method": self.payment_method,
+            "status": self.status,
+            "expired_at": self.expired_at.isoformat() if self.expired_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "subscription_plan_id": self.subscription_plan_id,
+        }
 
 
 class AdminUser(UserMixin):

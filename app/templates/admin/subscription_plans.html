@@ -1,0 +1,56 @@
+<div class="container-fluid px-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">{{ _("Subscription Plans") }}</h4>
+    <a href="{{ url_for('admin.subscription_plan_new') }}" class="btn btn-primary btn-sm">
+      + {{ _("New Plan") }}
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>{{ _("Name") }}</th>
+            <th>{{ _("Duration") }}</th>
+            <th>{{ _("Price") }}</th>
+            <th>{{ _("Active") }}</th>
+            <th>{{ _("Order") }}</th>
+            <th>{{ _("Actions") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for plan in plans %}
+          <tr>
+            <td>{{ plan.name }}</td>
+            <td>{{ plan.duration_days }} {{ _("days") }}</td>
+            <td>Rp {{ "{:,}".format(plan.price) }}</td>
+            <td>
+              {% if plan.is_active %}
+              <span class="badge bg-success">{{ _("Yes") }}</span>
+              {% else %}
+              <span class="badge bg-secondary">{{ _("No") }}</span>
+              {% endif %}
+            </td>
+            <td>{{ plan.sort_order }}</td>
+            <td>
+              <a href="{{ url_for('admin.subscription_plan_edit', plan_id=plan.id) }}" class="btn btn-sm btn-outline-primary">
+                {{ _("Edit") }}
+              </a>
+              <form method="POST" action="{{ url_for('admin.subscription_plan_delete', plan_id=plan.id) }}" style="display:inline" class="delete-form" data-confirm="{{ _('Delete this plan?') }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">{{ _('Delete') }}</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              {{ _("No subscription plans created yet.") }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

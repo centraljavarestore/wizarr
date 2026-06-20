@@ -18,6 +18,7 @@ from .plex.routes import plex_bp
 from .public.routes import public_bp
 from .settings.routes import settings_bp
 from .setup.routes import setup_bp
+from .subscription.routes import subscription_bp
 from .webauthn.routes import webauthn_bp
 from .wizard.routes import wizard_bp
 from .wizard_admin.routes import wizard_admin_bp
@@ -49,4 +50,5 @@ all_blueprints = (
     wizard_admin_bp,
     admin_accounts_bp,
     webauthn_bp,
+    subscription_bp,
 )

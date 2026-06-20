@@ -25,7 +25,9 @@ from app.models import (
     Library,
     MediaServer,
     PasswordResetToken,
+    PaymentTransaction,
     Settings,
+    SubscriptionPlan,
     User,
     invitation_servers,
     invitation_users,
@@ -1422,6 +1424,83 @@ def sync_users():
             500,
             {"Content-Type": "application/json"},
         )
+
+
+@admin_bp.route("/subscription/plans")
+@login_required
+def subscription_plans():
+    """List all subscription plans."""
+    if not request.headers.get("HX-Request"):
+        return render_template("admin/base.html", content="admin/subscription_plans.html")
+    plans = SubscriptionPlan.query.order_by(SubscriptionPlan.sort_order).all()
+    return render_template("admin/subscription_plans.html", plans=plans)
+
+
+@admin_bp.route("/subscription/plans/new", methods=["GET", "POST"])
+@login_required
+def subscription_plan_new():
+    """Create a new subscription plan."""
+    from app.forms.admin import SubscriptionPlanForm
+
+    form = SubscriptionPlanForm()
+    if form.validate_on_submit():
+        plan = SubscriptionPlan(
+            name=form.name.data,
+            description=form.description.data,
+            duration_days=form.duration_days.data,
+            price=form.price.data,
+            is_active=form.is_active.data,
+            sort_order=form.sort_order.data,
+        )
+        db.session.add(plan)
+        db.session.commit()
+        return redirect(url_for("admin.subscription_plans"))
+    return render_template("admin/subscription_plan_form.html", form=form, edit=False)
+
+
+@admin_bp.route("/subscription/plans/<int:plan_id>/edit", methods=["GET", "POST"])
+@login_required
+def subscription_plan_edit(plan_id: int):
+    """Edit a subscription plan."""
+    from app.forms.admin import SubscriptionPlanForm
+
+    plan = db.session.get(SubscriptionPlan, plan_id)
+    if not plan:
+        return "Plan not found", 404
+
+    form = SubscriptionPlanForm(obj=plan)
+    if form.validate_on_submit():
+        plan.name = form.name.data
+        plan.description = form.description.data
+        plan.duration_days = form.duration_days.data
+        plan.price = form.price.data
+        plan.is_active = form.is_active.data
+        plan.sort_order = form.sort_order.data
+        db.session.commit()
+        return redirect(url_for("admin.subscription_plans"))
+    return render_template("admin/subscription_plan_form.html", form=form, edit=True, plan=plan)
+
+
+@admin_bp.route("/subscription/plans/<int:plan_id>/delete", methods=["POST"])
+@login_required
+def subscription_plan_delete(plan_id: int):
+    """Delete a subscription plan."""
+    plan = db.session.get(SubscriptionPlan, plan_id)
+    if not plan:
+        return "Plan not found", 404
+    db.session.delete(plan)
+    db.session.commit()
+    return redirect(url_for("admin.subscription_plans"))
+
+
+@admin_bp.route("/subscription/transactions")
+@login_required
+def subscription_transactions():
+    """List payment transactions."""
+    if not request.headers.get("HX-Request"):
+        return render_template("admin/base.html", content="admin/subscription_transactions.html")
+    transactions = PaymentTransaction.query.order_by(PaymentTransaction.created_at.desc()).all()
+    return render_template("admin/subscription_transactions.html", transactions=transactions)
 
 
 @admin_bp.route("/activity")

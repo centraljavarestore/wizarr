@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ _("Choose Your Plan") }} — Wizarr</title>
+  <!-- Use existing base styles -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .plan-card {
+      transition: all 0.3s ease;
+    }
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    .plan-card.selected {
+      border-color: #667eea;
+      background: #f5f3ff;
+    }
+    .plan-card input[type="radio"]:checked + label {
+      border-color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="w-full max-w-4xl mx-auto p-6">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">{{ _("Choose Your Plan") }}</h1>
+      <p class="text-white text-opacity-80">{{ _("Select a subscription plan to get started") }}</p>
+      {% if pakasir_mode == "sandbox" %}
+      <span class="inline-block bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full mt-2">
+        {{ _("SANDBOX MODE") }}
+      </span>
+      {% endif %}
+    </div>
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 max-w-md mx-auto">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" id="plan-form">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% for plan in plans %}
+        <div class="plan-card bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
+             onclick="selectPlan({{ plan.id }})">
+          <input type="radio"
+                 name="plan_id"
+                 value="{{ plan.id }}"
+                 id="plan-{{ plan.id }}"
+                 class="hidden"
+                 {% if loop.first %}checked{% endif %}>
+          <label for="plan-{{ plan.id }}" class="block p-6 cursor-pointer">
+            <div class="text-center">
+              <h3 class="text-xl font-bold text-gray-800 mb-1">{{ plan.name }}</h3>
+              {% if plan.description %}
+              <p class="text-sm text-gray-500 mb-4">{{ plan.description }}</p>
+              {% endif %}
+              <div class="text-3xl font-bold text-indigo-600 mb-2">
+                Rp {{ "{:,}".format(plan.price) }}
+              </div>
+              <p class="text-sm text-gray-500 mb-4">
+                {{ plan.duration_days }} {{ _("days") }}
+              </p>
+              <div class="text-sm font-medium text-indigo-600">
+                ~ Rp {{ "{:,}".format(plan.price // 30) }} / {{ _("day") }}
+              </div>
+              <button type="button"
+                      class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+                      onclick="selectPlan({{ plan.id }})">
+                {{ _("Select") }}
+              </button>
+            </div>
+          </label>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-12">
+          <p class="text-white text-xl">{{ _("No subscription plans available at this time.") }}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if plans %}
+      <div class="text-center mt-8">
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition text-lg">
+          {{ _("Proceed to Payment") }}
+        </button>
+      </div>
+      {% endif %}
+    </form>
+
+    <div class="text-center mt-6">
+      <a href="{{ url_for('public.invite', code=invite_code) }}" class="text-white text-opacity-70 hover:text-opacity-100 underline text-sm">
+        {{ _("I already have an account") }}
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function selectPlan(planId) {
+      document.querySelectorAll('input[name="plan_id"]').forEach(el => el.checked = false);
+      document.getElementById('plan-' + planId).checked = true;
+      document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('selected'));
+      document.getElementById('plan-' + planId).closest('.plan-card').classList.add('selected');
+    }
+
+    // Auto-select first plan
+    const firstRadio = document.querySelector('input[name="plan_id"]');
+    if (firstRadio) {
+      firstRadio.closest('.plan-card').classList.add('selected');
+    }
+  </script>
+</body>
+</html>

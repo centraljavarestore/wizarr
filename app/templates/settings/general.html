@@ -257,6 +257,44 @@
                 </div>
               </div>
             </div>
+            {# ───── Payment Gateway (Pakasir) ─────────────────────── #}
+            <div class="space-y-4">
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ _("Payment Gateway (Pakasir)") }}</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ _("Configure QRIS payment integration") }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
+                <div>
+                  {{ form.pakasir_project_slug.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-white") }}
+                  {{ form.pakasir_project_slug(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white") }}
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ form.pakasir_project_slug.description }}</p>
+                </div>
+                <div>
+                  {{ form.pakasir_api_key.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-white") }}
+                  {{ form.pakasir_api_key(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white") }}
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ form.pakasir_api_key.description }}</p>
+                </div>
+                <div>
+                  {{ form.pakasir_mode.label(class="block mb-2 text-sm font-medium text-gray-900 dark:text-white") }}
+                  {{ form.pakasir_mode(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white") }}
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ form.pakasir_mode.description }}</p>
+                </div>
+                <div class="pt-2">
+                  <a href="https://pakasir.com/p/docs" target="_blank" class="text-sm text-primary hover:underline">
+                    {{ _("How to get Pakasir credentials?") }} →
+                  </a>
+                </div>
+              </div>
+            </div>
             {# ───── Submit ───────────────────────────────────────── #}
             <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
               <div class="flex flex-col sm:flex-row gap-4 sm:justify-end">

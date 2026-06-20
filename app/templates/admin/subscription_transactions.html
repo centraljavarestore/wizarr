@@ -1,0 +1,52 @@
+<div class="container-fluid px-3">
+  <h4 class="mb-3">{{ _("Payment Transactions") }}</h4>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>{{ _("Order ID") }}</th>
+            <th>{{ _("Amount") }}</th>
+            <th>{{ _("Method") }}</th>
+            <th>{{ _("Status") }}</th>
+            <th>{{ _("Plan") }}</th>
+            <th>{{ _("Created") }}</th>
+            <th>{{ _("Completed") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tx in transactions %}
+          <tr>
+            <td class="font-mono text-xs">{{ tx.order_id }}</td>
+            <td>Rp {{ "{:,}".format(tx.total_payment or tx.amount) }}</td>
+            <td>{{ tx.payment_method or "-" }}</td>
+            <td>
+              {% if tx.status == "completed" %}
+              <span class="badge bg-success">{{ _("Completed") }}</span>
+              {% elif tx.status == "pending" %}
+              <span class="badge bg-warning text-dark">{{ _("Pending") }}</span>
+              {% elif tx.status == "expired" %}
+              <span class="badge bg-secondary">{{ _("Expired") }}</span>
+              {% elif tx.status == "failed" %}
+              <span class="badge bg-danger">{{ _("Failed") }}</span>
+              {% else %}
+              <span class="badge bg-info">{{ tx.status }}</span>
+              {% endif %}
+            </td>
+            <td>{{ tx.subscription_plan.name if tx.subscription_plan else "-" }}</td>
+            <td class="text-sm">{{ tx.created_at.strftime('%Y-%m-%d %H:%M') if tx.created_at else "-" }}</td>
+            <td class="text-sm">{{ tx.completed_at.strftime('%Y-%m-%d %H:%M') if tx.completed_at else "-" }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              {{ _("No transactions yet.") }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
